@@ -6,6 +6,7 @@ import com.pss.clientservice.service.dto.Call;
 import com.pss.clientservice.service.dto.Employee;
 import com.pss.clientservice.service.dto.State;
 import com.pss.clientservice.service.entity.*;
+import com.pss.clientservice.service.entity.exception.ResourceNotFoundException;
 import com.pss.clientservice.service.repository.ClientRepository;
 import com.pss.clientservice.service.repository.EmployeeRepository;
 import com.pss.clientservice.service.repository.WorkRequestRepository;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,16 +31,16 @@ public class WorkRequestService {
     @Autowired
     ClientRepository clientRepository;
 
-    public WorkRequest addWorkRequest(WorkRequest workRequest, long clientId) {
+    public WorkRequest addWorkRequest(WorkRequest workRequest, long clientId) throws ResourceNotFoundException {
 
-        workRequest.setClient(clientRepository.findById(clientId).get());
+        workRequest.setClient(clientRepository.findById(clientId).orElseThrow(() -> new ResourceNotFoundException("Client with id " + clientId + " not found")));
 
         return workRequestRepository.saveAndFlush(workRequest);
     }
 
-    public WorkRequestDTO viewWorkRequestById(long workRequestId) {
+    public WorkRequestDTO viewWorkRequestById(long workRequestId) throws ResourceNotFoundException {
 
-        return mapDTO(workRequestRepository.findById(workRequestId).get());
+        return mapDTO(workRequestRepository.findById(workRequestId).orElseThrow(() -> new ResourceNotFoundException("Request with id " + workRequestId + " not found")));
     }
 
     private Optional<WorkRequest> getWorkRequestById(long workRequestId) {
@@ -75,17 +75,17 @@ public class WorkRequestService {
         return dto;
     }
 
-    public WorkRequest addTechniciansToRequest(long workRequestId, long technicianId) {
-        WorkRequest workRequest = getWorkRequestById(workRequestId).get();
+    public WorkRequest addTechniciansToRequest(long workRequestId, long technicianId) throws ResourceNotFoundException {
+        WorkRequest workRequest = getWorkRequestById(workRequestId).orElseThrow(() -> new ResourceNotFoundException("Request with id " + workRequestId + " not found"));
         List<Employee> technicians = workRequest.getEmployee();
-        technicians.add(employeeRepository.findById(technicianId).get());
+        technicians.add(employeeRepository.findById(technicianId).orElseThrow(() -> new ResourceNotFoundException("Technician with id " + technicianId + " not found")));
         BeanUtils.copyProperties(workRequest, workRequest, "id");
 
         return workRequestRepository.saveAndFlush(workRequest);
     }
 
-    public WorkRequest removeTechniciansFromRequest(long workRequestId, long technicianId) {
-        WorkRequest workRequest = getWorkRequestById(workRequestId).get();
+    public WorkRequest removeTechniciansFromRequest(long workRequestId, long technicianId) throws ResourceNotFoundException {
+        WorkRequest workRequest = getWorkRequestById(workRequestId).orElseThrow(() -> new ResourceNotFoundException("Request with id " + workRequestId + " not found"));
         List<Employee> technicians = workRequest.getEmployee();
         technicians.removeIf(employee -> employee.getId() == technicianId);
         BeanUtils.copyProperties(workRequest, workRequest, "id");
@@ -93,9 +93,9 @@ public class WorkRequestService {
         return workRequestRepository.saveAndFlush(workRequest);
     }
 
-    public WorkRequest changeState(State state, long workRequestId) {
+    public WorkRequest changeState(State state, long workRequestId) throws ResourceNotFoundException {
 
-        WorkRequest workRequest = getWorkRequestById(workRequestId).get();
+        WorkRequest workRequest = getWorkRequestById(workRequestId).orElseThrow(() -> new ResourceNotFoundException("Request with id " + workRequestId + " not found"));
         workRequest.setState(state);
         if (state == State.SERVICE_CLOSED){
             workRequest.setDate_resolved(LocalDate.now());
@@ -104,8 +104,8 @@ public class WorkRequestService {
         return workRequestRepository.saveAndFlush(workRequest);
     }
 
-    public WorkRequest changePriority(WorkRequestPriority priority, long workRequestId ) {
-        WorkRequest workRequest = getWorkRequestById(workRequestId).get();
+    public WorkRequest changePriority(WorkRequestPriority priority, long workRequestId ) throws ResourceNotFoundException {
+        WorkRequest workRequest = getWorkRequestById(workRequestId).orElseThrow(() -> new ResourceNotFoundException("Request with id " + workRequestId + " not found"));
         workRequest.setWorkRequestPriority(priority);
         BeanUtils.copyProperties(workRequest, workRequest, "id");
         return workRequestRepository.saveAndFlush(workRequest);
