@@ -29,7 +29,7 @@ public class ErrorLoggingService {
         logException(e, errorCode);
         return ResponseEntity.status(errorCode.getHttpStatus()).body(new ExceptionResponse(Constants.RESPONSE_TYPE_ERROR, messageResolver.getMessage(errorCode), errorCode.getResponseCode()));
     }
-        // this we can use for a f
+
   public void logException(Exception e, MessagingAPIExceptionMessage errorCode) {
         log.trace("Global exception hangler {}", errorCode, e);
         String exceptionMessage = (e == null || StringUtils.isBlank(e.getMessage())) ? messageResolver.getMessage(errorCode) : e.getMessage();

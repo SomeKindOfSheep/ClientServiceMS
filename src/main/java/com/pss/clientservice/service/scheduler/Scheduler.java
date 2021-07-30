@@ -21,9 +21,9 @@ public class Scheduler {
     WorkRequestRepository workRequestRepository;
 
 
-    @Async
     //this runs every 24 hours
     //@Scheduled(fixedRate = 86400000)
+    @Async
     @Scheduled(fixedRate = 5000)
     public void scheduledTask() {
         try{
