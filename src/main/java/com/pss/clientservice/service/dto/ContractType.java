@@ -3,6 +3,7 @@ package com.pss.clientservice.service.dto;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 
 @Getter
@@ -24,5 +25,11 @@ public class ContractType {
 
     @Column(name = "description")
     private String description;
+
+    @Column(name = "date_from")
+    private LocalDate dateFrom;
+
+    @Column(name = "date_to")
+    private LocalDate dateTo;
 
 }
